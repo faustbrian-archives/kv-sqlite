@@ -6,44 +6,54 @@ import { DatabaseOptions } from "./interfaces";
 
 export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 	private readonly store: BetterSqlite3.Database;
-	private readonly table: any; // @TODO: add a proper type
+	private readonly opts: DatabaseOptions;
+	private readonly table: any;
 
-	public constructor(readonly opts: DatabaseOptions) {
-		this.opts = {
+	private constructor({ store, opts, table }: { store: BetterSqlite3.Database; opts: DatabaseOptions; table: any }) {
+		this.store = store;
+		this.opts = opts;
+		this.table = table;
+	}
+
+	public static new<K, T>(opts: DatabaseOptions): StoreSync<K, T> {
+		// tslint:disable-next-line: no-parameter-reassignment
+		opts = {
 			keySize: 255,
 			table: "ckvs",
 			...opts,
 		};
 
-		this.store = new BetterSqlite3(this.opts.connection);
+		const store = new BetterSqlite3(opts.connection);
 
 		sql.setDialect("sqlite");
 
-		this.table = sql.define({
+		const table = sql.define({
 			columns: [
 				{
-					dataType: `VARCHAR(${Number(this.opts.keySize)})`,
+					dataType: `VARCHAR(${Number(opts.keySize)})`,
 					// @ts-ignore
 					name: "key",
 					primaryKey: true,
 				},
 				{
 					// @ts-ignore
-					dataType: this.opts.type,
+					dataType: opts.type,
 					// @ts-ignore
 					name: "value",
 				},
 			],
 			// @ts-ignore
-			name: this.opts.table,
+			name: opts.table,
 		});
 
-		this.store.exec(
-			this.table
+		store.exec(
+			table
 				.create()
 				.ifNotExists()
 				.toString(),
 		);
+
+		return new StoreSync<K, T>({ store, table, opts });
 	}
 
 	public all(): [K, T][] {

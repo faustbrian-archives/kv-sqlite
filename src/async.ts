@@ -3,10 +3,10 @@ import { DatabaseOptions } from "./interfaces";
 import { StoreSync } from "./sync";
 
 export class StoreAsync<K, T> implements IKeyValueStoreAsync<K, T> {
-	private readonly store: StoreSync<K, T>;
+	private constructor(private readonly store: StoreSync<K, T>) {}
 
-	public constructor(readonly opts: DatabaseOptions) {
-		this.store = new StoreSync<K, T>(opts);
+	public static async new<K, T>(opts: DatabaseOptions): Promise<StoreAsync<K, T>> {
+		return new StoreAsync<K, T>(new StoreSync<K, T>(opts));
 	}
 
 	public async all(): Promise<[K, T][]> {
