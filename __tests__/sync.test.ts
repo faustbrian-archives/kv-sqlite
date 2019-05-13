@@ -2,7 +2,7 @@ import { complianceTestsSync } from "@keeveestore/test-suite";
 import tempy from "tempy";
 import { StoreSync } from "../src/sync";
 
-complianceTestsSync(new StoreSync<string, number>({ connection: tempy.file(), type: "INTEGER" }), {
+complianceTestsSync(() => StoreSync.new<string, number>({ connection: tempy.file(), type: "INTEGER" }), {
 	"1": 1,
 	"2": 2,
 	"3": 3,
