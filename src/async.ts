@@ -6,7 +6,7 @@ export class StoreAsync<K, T> implements IKeyValueStoreAsync<K, T> {
 	private constructor(private readonly store: StoreSync<K, T>) {}
 
 	public static async new<K, T>(opts: DatabaseOptions): Promise<StoreAsync<K, T>> {
-		return new StoreAsync<K, T>(new StoreSync<K, T>(opts));
+		return new StoreAsync<K, T>(StoreSync.new<K, T>(opts));
 	}
 
 	public async all(): Promise<[K, T][]> {
