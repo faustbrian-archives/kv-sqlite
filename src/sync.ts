@@ -2,6 +2,7 @@
 import { IKeyValueStoreSync } from "@konceiver/kv";
 import BetterSqlite3 from "better-sqlite3";
 import sql from "sql";
+
 import { DatabaseOptions } from "./interfaces";
 
 export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
@@ -9,7 +10,15 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 	private readonly opts: DatabaseOptions;
 	private readonly table: any;
 
-	private constructor({ store, opts, table }: { store: BetterSqlite3.Database; opts: DatabaseOptions; table: any }) {
+	private constructor({
+		store,
+		opts,
+		table,
+	}: {
+		store: BetterSqlite3.Database;
+		opts: DatabaseOptions;
+		table: any;
+	}) {
 		this.store = store;
 		this.opts = opts;
 		this.table = table;
@@ -46,12 +55,7 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 			name: opts.table,
 		});
 
-		store.exec(
-			table
-				.create()
-				.ifNotExists()
-				.toString(),
-		);
+		store.exec(table.create().ifNotExists().toString());
 
 		return new StoreSync<K, T>({ store, table, opts });
 	}
@@ -80,12 +84,7 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 	public get(key: K): T | undefined {
 		try {
 			const { value } = this.store
-				.prepare(
-					this.table
-						.select(this.table.value)
-						.where({ key })
-						.toString(),
-				)
+				.prepare(this.table.select(this.table.value).where({ key }).toString())
 				.get();
 
 			return value;
@@ -130,7 +129,9 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 
 	public has(key: K): boolean {
 		const { exists } = this.store
-			.prepare(`SELECT EXISTS(SELECT value FROM ${this.opts.table} WHERE key = :key) AS "exists";`)
+			.prepare(
+				`SELECT EXISTS(SELECT value FROM ${this.opts.table} WHERE key = :key) AS "exists";`
+			)
 			.get({ key });
 
 		return exists === 1;
@@ -153,12 +154,7 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 			return false;
 		}
 
-		this.store.exec(
-			this.table
-				.delete()
-				.where({ key })
-				.toString(),
-		);
+		this.store.exec(this.table.delete().where({ key }).toString());
 
 		return this.missing(key);
 	}
@@ -174,7 +170,9 @@ export class StoreSync<K, T> implements IKeyValueStoreSync<K, T> {
 	}
 
 	public count(): number {
-		const { count } = this.store.prepare(this.table.select("COUNT(*) AS count").toString()).get();
+		const { count } = this.store
+			.prepare(this.table.select("COUNT(*) AS count").toString())
+			.get();
 
 		return count;
 	}
