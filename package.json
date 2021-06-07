@@ -27,7 +27,7 @@
 	],
 	"dependencies": {
 		"@konceiver/kv": "^1.0.1",
-		"better-sqlite3": "^7.4.0",
+		"better-sqlite3": "^7.4.1",
 		"sql": "^0.78.0"
 	},
 	"devDependencies": {
